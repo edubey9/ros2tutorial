@@ -131,13 +131,13 @@ msg.data = 3.14
 Terminal 1 (Publisher):
 ```bash
 source /opt/ros/humble/setup.bash
-python publisher_node.py
+python3 publisher_node.py
 ```
 
 Terminal 2 (Subscriber):
 ```bash
 source /opt/ros/humble/setup.bash
-python subscriber_node.py
+python3 subscriber_node.py
 ```
 
 Terminal 3 (Optional - Monitor):

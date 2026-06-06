@@ -159,7 +159,7 @@ Once your container is running, you can execute commands from your host machine 
 
 ```bash
 # Run a command in the container (from your host terminal)
-docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && python3 examples/pub_sub_example.py publisher"
+docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/pub_sub_example.py publisher"
 
 # Run the test script
 docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 test_ros2_setup.py"
@@ -178,7 +178,7 @@ source /opt/ros/humble/setup.bash
 
 ```powershell
 # Run a command in the container (from your host terminal)
-docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && python3 examples/pub_sub_example.py publisher"
+docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/pub_sub_example.py publisher"
 
 # Run the test script
 docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 test_ros2_setup.py"
@@ -545,7 +545,14 @@ print('✓ ROS 2 is properly configured')
 ```
 .
 ├── README.md                      # This file
+├── GETTING_STARTED.md             # Quick start guide
+├── DOCKER_GUIDE.md                # Docker setup and VSCode integration
+├── FRESH_SETUP.md                 # New-computer setup guide
+├── PROGRESS_TRACKER.md            # Learning progress tracking
 ├── requirements.txt               # Python dependencies
+├── test_ros2_setup.py             # Python test script
+├── test_setup.sh                  # Bash test script
+├── .vscode/tasks.json             # VSCode tasks (run examples via Docker)
 ├── tutorials/                     # Learning materials
 │   ├── 01_setup.md
 │   ├── 02_publisher_subscriber.md
@@ -733,28 +740,28 @@ Each example can be run in separate terminal windows:
 ```bash
 # Example 1: Publisher/Subscriber
 # Terminal 1 (Publisher)
-python examples/pub_sub_example.py publisher
+python3 examples/pub_sub_example.py publisher
 
 # Terminal 2 (Subscriber)
-python examples/pub_sub_example.py subscriber
+python3 examples/pub_sub_example.py subscriber
 ```
 
 ```bash
 # Example 2: Service Server/Client
 # Terminal 1 (Server)
-python examples/service_example.py server
+python3 examples/service_example.py server
 
 # Terminal 2 (Client)
-python examples/service_example.py client
+python3 examples/service_example.py client
 ```
 
 ```bash
 # Example 3: Action Server/Client
 # Terminal 1 (Server)
-python examples/action_example.py server
+python3 examples/action_example.py server
 
 # Terminal 2 (Client)
-python examples/action_example.py client
+python3 examples/action_example.py client
 ```
 
 ## Exercises
@@ -793,10 +800,10 @@ Complete the exercises in order to reinforce your learning. Each exercise includ
 **Test it:**
 ```bash
 # Terminal 1
-python exercises/exercise_01_pub_sub.py pub
+python3 exercises/exercise_01_pub_sub.py pub
 
 # Terminal 2
-python exercises/exercise_01_pub_sub.py
+python3 exercises/exercise_01_pub_sub.py
 ```
 
 **Expected output:**
@@ -824,10 +831,10 @@ Terminal 2: Received: 0, Received: 1, ...
 **Test it:**
 ```bash
 # Terminal 1
-python exercises/exercise_02_services.py server
+python3 exercises/exercise_02_services.py server
 
 # Terminal 2
-python exercises/exercise_02_services.py client
+python3 exercises/exercise_02_services.py client
 ```
 
 **Expected output:**
@@ -857,10 +864,10 @@ Client: Result: 3 * 4 = 12
 **Test it:**
 ```bash
 # Terminal 1
-python exercises/exercise_03_actions.py server
+python3 exercises/exercise_03_actions.py server
 
 # Terminal 2
-python exercises/exercise_03_actions.py client
+python3 exercises/exercise_03_actions.py client
 ```
 
 **Expected output:**
@@ -940,7 +947,7 @@ cd /path/to/ros2-learning
 source venv/bin/activate
 
 # Then run the script
-python exercises/exercise_01_pub_sub.py
+python3 exercises/exercise_01_pub_sub.py
 ```
 
 ### Runtime Issues
@@ -951,11 +958,11 @@ python exercises/exercise_01_pub_sub.py
 # Solution: Start the server FIRST, then the client
 
 # Terminal 1 (Server)
-python examples/service_example.py server
+python3 examples/service_example.py server
 
 # Wait for it to print "Service ready..."
 # Then in Terminal 2 (Client)
-python examples/service_example.py client
+python3 examples/service_example.py client
 ```
 
 **Problem: Nodes can't communicate**
@@ -1165,10 +1172,13 @@ Features:
 .
 ├── README.md                      # Main documentation
 ├── GETTING_STARTED.md             # Quick start guide
+├── DOCKER_GUIDE.md                # Docker setup and VSCode integration
+├── FRESH_SETUP.md                 # New-computer setup guide
 ├── PROGRESS_TRACKER.md            # Learning progress tracking
 ├── test_ros2_setup.py            # Python test script
 ├── test_setup.sh                 # Bash test script
 ├── requirements.txt               # Python dependencies
+├── .vscode/tasks.json             # VSCode tasks (run examples via Docker)
 │
 ├── tutorials/                     # 5 learning tutorials
 │   ├── 01_setup.md              # Concepts and setup

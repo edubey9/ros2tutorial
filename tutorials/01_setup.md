@@ -80,7 +80,7 @@ if __name__ == '__main__':
 source /opt/ros/humble/setup.bash
 
 # Run your node
-python your_node.py
+python3 your_node.py
 ```
 
 ## Useful ROS 2 CLI Commands

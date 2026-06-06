@@ -122,13 +122,13 @@ if __name__ == '__main__':
 Terminal 1 (Service Server):
 ```bash
 source /opt/ros/humble/setup.bash
-python service_server.py
+python3 service_server.py
 ```
 
 Terminal 2 (Service Client):
 ```bash
 source /opt/ros/humble/setup.bash
-python service_client.py
+python3 service_client.py
 ```
 
 Terminal 3 (Optional - Test via CLI):

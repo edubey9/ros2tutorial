@@ -42,14 +42,14 @@ ros2 --version
 ```bash
 cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
-python examples/pub_sub_example.py publisher
+python3 examples/pub_sub_example.py publisher
 ```
 
 **Terminal 2** (Subscriber):
 ```bash
 cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
-python examples/pub_sub_example.py subscriber
+python3 examples/pub_sub_example.py subscriber
 ```
 
 **Expected Output:**
@@ -66,14 +66,14 @@ Subscriber: I heard: "Hello ROS 2! Message #1"
 ```bash
 cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
-python examples/service_example.py server
+python3 examples/service_example.py server
 ```
 
 **Terminal 2** (Client):
 ```bash
 cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
-python examples/service_example.py client
+python3 examples/service_example.py client
 ```
 
 **Expected Output:**
@@ -89,14 +89,14 @@ Client: Result: 2 + 3 = 5
 ```bash
 cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
-python examples/action_example.py server
+python3 examples/action_example.py server
 ```
 
 **Terminal 2** (Client):
 ```bash
 cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
-python examples/action_example.py client
+python3 examples/action_example.py client
 ```
 
 ## Step 3: Complete the Exercises
@@ -109,10 +109,10 @@ Use the `exercise_01_pub_sub.py` file and follow the instructions in the comment
 
 ```bash
 # Terminal 1: Publisher
-python exercises/exercise_01_pub_sub.py pub
+python3 exercises/exercise_01_pub_sub.py pub
 
 # Terminal 2: Subscriber
-python exercises/exercise_01_pub_sub.py
+python3 exercises/exercise_01_pub_sub.py
 ```
 
 ### Exercise 2: Services
@@ -123,10 +123,10 @@ Use the `exercise_02_services.py` file and implement the server and client.
 
 ```bash
 # Terminal 1: Server
-python exercises/exercise_02_services.py server
+python3 exercises/exercise_02_services.py server
 
 # Terminal 2: Client
-python exercises/exercise_02_services.py client
+python3 exercises/exercise_02_services.py client
 ```
 
 ### Exercise 3: Actions
@@ -137,10 +137,10 @@ Use the `exercise_03_actions.py` file and implement the countdown server and cli
 
 ```bash
 # Terminal 1: Server
-python exercises/exercise_03_actions.py server
+python3 exercises/exercise_03_actions.py server
 
 # Terminal 2: Client
-python exercises/exercise_03_actions.py client
+python3 exercises/exercise_03_actions.py client
 ```
 
 ## Useful Debugging Commands
