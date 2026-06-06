@@ -45,30 +45,6 @@ This guide covers everything you need to know about using Docker with the ROS 2 
    docker run hello-world  # Should print "Hello from Docker!"
    ```
 
-   **Apple Silicon note (M1 / M2 / M3):**
-
-   On Apple Silicon Macs you can run native ARM64 images (recommended) or run x86_64 images under emulation. To detect your Mac's architecture run:
-
-   ```bash
-   uname -m
-   # returns 'arm64' on Apple Silicon, 'x86_64' on Intel
-   ```
-
-   Recommendation:
-
-   - If your Mac reports `arm64`, prefer ARM images (use `--platform linux/arm64` when pulling/running). Many official images now provide ARM builds.
-   - If a required image is only available for amd64, Docker Desktop will emulate `linux/amd64` but expect reduced performance and possibly some incompatibilities.
-
-   Examples:
-
-   ```bash
-   # Pull native ARM64 image (recommended on Apple Silicon)
-   docker pull --platform linux/arm64 osrf/ros:humble-desktop
-
-   # Or pull amd64 image under emulation (slower)
-   docker pull --platform linux/amd64 osrf/ros:humble-desktop
-   ```
-
 #### Windows (PowerShell)
 
 1. **Download Docker Desktop**
@@ -132,29 +108,6 @@ python3 -m pip install pytest pyyaml
 
 # Exit container (but keep it running)
 exit
-
-### Apple Silicon (M1/M2/M3) - Container Setup Notes
-
-If you're on an Apple Silicon Mac (`uname -m` -> `arm64`), prefer pulling and running the ARM64 image to avoid emulation. Use the `--platform linux/arm64` flag when pulling/running the image.
-
-Example (recommended on Apple Silicon):
-
-```bash
-# From your project directory
-docker pull --platform linux/arm64 osrf/ros:humble-desktop
-docker run --platform linux/arm64 -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
-```
-
-If a package or image you need is only available for x86_64, you can run the amd64 image under emulation (slower):
-
-```bash
-docker pull --platform linux/amd64 osrf/ros:humble-desktop
-docker run --platform linux/amd64 -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
-```
-
-Notes:
-- Emulated amd64 containers may be noticeably slower and can have compatibility issues with some native extensions.
-- Prefer ARM images where possible; check upstream images or build locally if needed.
 ```
 
 #### Windows (PowerShell)
@@ -485,100 +438,6 @@ docker run -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humbl
 
 ### Getting Help
 
-
-## Apple Silicon Compatibility Notes
-
-Apple Silicon (M1/M2/M3) Macs can run native ARM64 images or run x86_64 images with Docker Desktop emulation. Many core ROS 2 packages work fine on ARM, but some packages that depend on native binary libraries or simulators may require extra work.
-
-Quick checks and recommendations
-
-- Detect architecture:
-
-```bash
-uname -m
-# 'arm64' on Apple Silicon, 'x86_64' on Intel
-```
-
-- Prefer native ARM images when `uname -m` reports `arm64`:
-
-```bash
-docker pull --platform linux/arm64 osrf/ros:humble-desktop
-docker run --platform linux/arm64 -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
-```
-
-- If a package is only available for amd64, you can fall back to emulation (slower):
-
-```bash
-docker pull --platform linux/amd64 osrf/ros:humble-desktop
-docker run --platform linux/amd64 -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
-```
-
-Common ROS 2 components that may need attention on Apple Silicon
-
-- Gazebo / Ignition (simulators): official binaries and plugins historically lag for arm64. If you need Gazebo, consider running it on an amd64 VM or using the emulator image and expect possible performance degradation.
-- `cv_bridge`, `image_pipeline`, OpenCV-based packages: these rely on OpenCV native libs. On arm64 you may need to install arm64 OpenCV packages or build OpenCV from source inside the container.
-- `rosbag2` plugins and compression libraries (lz4, zstd): ensure the compression libraries are available for arm64 or build the plugins from source.
-- Packages with native extensions (Cython, C++ nodes with third-party libs): these must be compiled for arm64 inside the container; prebuilt binaries for amd64 will not work.
-- `rclpy` / Python bindings: when using the official arm64 ROS image, `rclpy` is typically available via apt inside the container; pip wheels for `rclpy` may not be published for arm64, so prefer the container's apt packages or build from source.
-
-Workarounds and solutions
-
-1. Prefer ARM64 images when possible — much faster than emulation.
-
-2. Build problematic packages from source inside an ARM container:
-
-```bash
-# Inside the container in /home/ros2_ws/project
-# 1) Place packages in 'src/'
-rosdep update
-rosdep install --from-paths src --ignore-src -r -y
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
-source install/setup.bash
-```
-
-3. Use `rosdep` to install missing system dependencies (it will choose the correct architecture when apt repos provide arm64 packages).
-
-```bash
-rosdep install --from-paths src --ignore-src -r -y
-```
-
-4. If a package depends on a binary third-party library (e.g., OpenCV, Gazebo plugins), install or compile the library for arm64 inside the container before building the ROS package.
-
-5. When a package is not available for arm64 and emulation is tolerable, use `--platform linux/amd64` to run the amd64 image — this is the simplest path but may be slow and occasionally incompatible.
-
-Diagnostic commands
-
-```bash
-# Check missing system deps via rosdep
-rosdep check --from-paths src --ignore-src -y
-
-# Inspect a built shared object for architecture
-file build/<package>/lib/<lib>.so
-
-# Use ldd to list linked libraries
-ldd build/<package>/lib/<lib>.so
-```
-
-Notes and further reading
-
-- Emulated amd64 containers do not provide accelerated GPU access and will be slower for heavy workloads such as large builds or simulators.
-- For complex simulation stacks (Gazebo, Ignition) consider a dedicated amd64 Linux VM or cloud instance if arm64 builds are not available.
-- If you frequently target both Intel and Apple Silicon, consider automating a small wrapper script that detects `uname -m` and selects `--platform` accordingly (example below).
-
-Example wrapper (host script) — chooses platform automatically:
-
-```bash
-#!/usr/bin/env bash
-arch=$(uname -m)
-platform=linux/amd64
-if [ "$arch" = "arm64" ]; then
-   platform=linux/arm64
-fi
-
-docker run --platform "$platform" -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
-```
-
-If you want, I can add specific notes for packages you care about (OpenCV/cv_bridge, Gazebo, rosbag2, etc.) with example Dockerfile snippets or build commands.
 If something doesn't work:
 
 1. Check Docker is running (`docker ps` should work)

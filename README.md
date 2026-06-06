@@ -83,57 +83,14 @@ docker run hello-world  # Test Docker works
 
 # 3. Open PowerShell and verify
 docker --version
-### Docker Installation
-
-#### macOS (Intel / Apple Silicon)
-```bash
-# 1. Download and install Docker Desktop from:
-# https://www.docker.com/products/docker-desktop
-
-# 2. Open Docker.app from Applications folder
-
-# 3. Verify installation in terminal
 docker run hello-world  # Test Docker works
 ```
-```
-
-Note: On Apple Silicon (M1, M2) Macs you have two options:
-
-- Prefer native ARM images (recommended): pull and run the ARM64 image using the `--platform linux/arm64` flag. This avoids emulation and is faster:
-
-```bash
-# From your project directory
 
 ### Setting Up ROS 2 Docker Container
-```
-
-- Use the AMD64 image under emulation (slower): if a required image or package is only available for x86_64, Docker Desktop can emulate `linux/amd64` but expect lower performance:
-
-```bash
 
 #### Step 1: Create and Run Container
-```
-
-If you're unsure which architecture your Mac uses, run:
-```bash
-uname -m
-# returns 'arm64' on Apple Silicon, 'x86_64' on Intel
-```
-
-For more details and troubleshooting on Apple Silicon, see [DOCKER_GUIDE.md](DOCKER_GUIDE.md).
-
-#### Windows
-```powershell
-# 1. Download Docker Desktop from:
-# https://www.docker.com/products/docker-desktop
-
-# 2. Run the installer and follow instructions
-# Note: May require enabling WSL2 or Hyper-V
-
-# 3. Open PowerShell and verify
 
 **macOS:**
-```
 ```bash
 # Navigate to project directory
 cd ~/Documents/ros2-learning  # or your project path
