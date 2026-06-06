@@ -1,0 +1,2 @@
+docker run --platform linux/amd64 -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
+
