@@ -134,12 +134,11 @@ Lifecycle nodes follow a state machine: unconfigured → inactive → active →
 
 ```python
 import rclpy
-from rclpy_lifecycle.node import LifecycleNode
-from rclpy_lifecycle.state import State, Transition
-from lifecycle_msgs.srv import ChangeState
-from lifecycle_msgs.msg import Transition as TransitionMsg
+from rclpy.lifecycle import Node
+from rclpy.lifecycle import State
+from rclpy.lifecycle import TransitionCallbackReturn
 
-class LifecycleExample(LifecycleNode):
+class LifecycleExample(Node):
     def __init__(self):
         super().__init__('lifecycle_example')
 

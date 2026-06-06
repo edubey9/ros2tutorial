@@ -122,7 +122,7 @@ Use this file to track your progress through the ROS 2 learning curriculum. Chec
 
 ### Verification
 - [ ] `ros2 service list` shows /multiply_numbers
-- [ ] `ros2 service call /multiply_numbers std_srvs/srv/AddTwoInts "{a: 5, b: 6}"` returns correct result
+- [ ] `ros2 service call /multiply_numbers example_interfaces/srv/AddTwoInts "{a: 5, b: 6}"` returns correct result
 - [ ] Server shows incoming requests
 - [ ] Client shows returned results
 - [ ] Exercise runs multiple requests successfully

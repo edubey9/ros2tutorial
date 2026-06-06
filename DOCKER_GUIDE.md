@@ -91,6 +91,11 @@ docker run -it \
   -v $(pwd):/home/ros2_ws/project \
   --name ros2-humble \
   osrf/ros:humble-desktop /bin/bash
+
+# NOTE for Apple Silicon (M1/M2/M3) Macs: the osrf/ros image is
+# amd64-only, so add --platform linux/amd64 before -v (it runs
+# under emulation; slower but works):
+# docker run -it --platform linux/amd64 -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
 ```
 
 **You're now inside the container!** You should see: `root@<container_id>:/#`
@@ -246,9 +251,9 @@ The project includes these pre-configured tasks:
 - **ROS2: Run Service Client (Example 2)** - Run service client
 - **ROS2: Run Action Server (Example 3)** - Run action server
 - **ROS2: Run Action Client (Example 3)** - Run action client
-- **ROS2: Exercise 1 (Pub/Sub)** - Run exercise 1
-- **ROS2: Exercise 2 (Services)** - Run exercise 2
-- **ROS2: Exercise 3 (Actions)** - Run exercise 3
+- **ROS2: Exercise 1 Publisher / Subscriber** - Run exercise 1 (run both, in two tasks)
+- **ROS2: Exercise 2 Server / Client** - Run exercise 2 (start Server first)
+- **ROS2: Exercise 3 Server / Client** - Run exercise 3 (start Server first)
 - **ROS2: Interactive Container Shell** - Open bash in container
 - **ROS2: Start Docker Container** - Start the container
 - **ROS2: Stop Docker Container** - Stop the container
@@ -457,7 +462,7 @@ docker pull osrf/ros:humble-desktop
 docker run -it -v $(pwd):/home/ros2_ws/project --name ros2-humble osrf/ros:humble-desktop /bin/bash
 
 # Run commands without entering container
-docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && python3 test_ros2_setup.py"
+docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 test_ros2_setup.py"
 
 # Enter interactive shell
 docker exec -it ros2-humble bash
@@ -477,7 +482,7 @@ docker stats ros2-humble      # Resource usage
 ## Next Steps
 
 1. **Set up container** - Follow Container Setup section above
-2. **Verify it works** - Run: `docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && python3 test_ros2_setup.py"`
+2. **Verify it works** - Run: `docker exec ros2-humble bash -c "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 test_ros2_setup.py"`
 3. **Use VSCode tasks** - Press Cmd+Shift+B and select a task
 4. **Start learning** - Work through tutorials in README
 

@@ -1,4 +1,4 @@
-# Getting Started with ROS 2
+﻿# Getting Started with ROS 2
 
 A quick start guide to run the tutorials, examples, and exercises.
 
@@ -11,19 +11,17 @@ A quick start guide to run the tutorials, examples, and exercises.
 
 ## Step 1: Prepare Your Environment
 
-### For macOS (Docker recommended):
+### For macOS / Windows (Docker recommended):
 
 ```bash
-# Start Docker and run ROS 2 container
-docker run -it --name ros2-humble osrf/ros:humble-desktop
+# From the project directory, start a ROS 2 container with the
+# project mounted at /home/ros2_ws/project (run once):
+docker run -it -v "$(pwd):/home/ros2_ws/project" --name ros2-humble osrf/ros:humble-desktop
+# Windows PowerShell: use ${PWD} instead of $(pwd)
 
 # Inside the container:
-cd /tmp
-mkdir -p ros2_learning
-cd ros2_learning
-
-# Copy files (from your host, in another terminal):
-# docker cp /Users/etash/Documents/Project1/examples docker_container_id:/tmp/ros2_learning/
+source /opt/ros/humble/setup.bash
+cd /home/ros2_ws/project
 ```
 
 ### For Linux:
@@ -42,14 +40,14 @@ ros2 --version
 
 **Terminal 1** (Publisher):
 ```bash
-cd /Users/etash/Documents/Project1
+cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
 python examples/pub_sub_example.py publisher
 ```
 
 **Terminal 2** (Subscriber):
 ```bash
-cd /Users/etash/Documents/Project1
+cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
 python examples/pub_sub_example.py subscriber
 ```
@@ -66,14 +64,14 @@ Subscriber: I heard: "Hello ROS 2! Message #1"
 
 **Terminal 1** (Server):
 ```bash
-cd /Users/etash/Documents/Project1
+cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
 python examples/service_example.py server
 ```
 
 **Terminal 2** (Client):
 ```bash
-cd /Users/etash/Documents/Project1
+cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
 python examples/service_example.py client
 ```
@@ -89,14 +87,14 @@ Client: Result: 2 + 3 = 5
 
 **Terminal 1** (Server):
 ```bash
-cd /Users/etash/Documents/Project1
+cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
 python examples/action_example.py server
 ```
 
 **Terminal 2** (Client):
 ```bash
-cd /Users/etash/Documents/Project1
+cd /home/ros2_ws/project  # or your project path
 source /opt/ros/humble/setup.bash
 python examples/action_example.py client
 ```
@@ -163,7 +161,7 @@ ros2 topic echo /chatter
 ros2 service list
 
 # Call a service manually
-ros2 service call /add_two_ints std_srvs/srv/AddTwoInts "{a: 2, b: 3}"
+ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 2, b: 3}"
 
 # View node graph
 rqt_graph
@@ -181,10 +179,11 @@ source /opt/ros/humble/setup.bash
 ```
 
 ### "Python module not found"
-Install dependencies:
+`rclpy` and message packages are **not** pip-installable — they come with ROS 2 itself. If imports fail, it means ROS 2 isn't sourced in this terminal:
 ```bash
-pip install rclpy std-msgs
+source /opt/ros/humble/setup.bash
 ```
+(If you're on macOS/Windows, make sure you're running the command **inside** the Docker container.)
 
 ### "Node cannot communicate"
 Check that you're on the same ROS_DOMAIN_ID:

@@ -16,8 +16,9 @@ A service consists of a request and a response. ROS 2 provides built-in service 
 ### Common Built-in Services
 
 ```python
-# Two integers, return one integer (from std_srvs)
-from std_srvs.srv import AddTwoInts
+# Two integers, return one integer (from example_interfaces,
+# which ships with ROS 2 — note: std_srvs does NOT contain AddTwoInts)
+from example_interfaces.srv import AddTwoInts
 
 # The request has:
 # int64 a
@@ -35,7 +36,7 @@ A Service Server waits for requests and sends responses.
 ```python
 import rclpy
 from rclpy.node import Node
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
 
 class MinimalService(Node):
     def __init__(self):
@@ -57,7 +58,7 @@ class MinimalService(Node):
 def main(args=None):
     rclpy.init(args=args)
     minimal_service = MinimalService()
-    self.get_logger().info('Service ready to accept requests')
+    minimal_service.get_logger().info('Service ready to accept requests')
     rclpy.spin(minimal_service)
     rclpy.shutdown()
 
@@ -74,7 +75,7 @@ A Service Client sends requests and waits for responses.
 ```python
 import rclpy
 from rclpy.node import Node
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
 import time
 
 class MinimalClientAsync(Node):
@@ -133,7 +134,7 @@ python service_client.py
 Terminal 3 (Optional - Test via CLI):
 ```bash
 source /opt/ros/humble/setup.bash
-ros2 service call /add_two_ints std_srvs/srv/AddTwoInts "{a: 5, b: 3}"
+ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts "{a: 5, b: 3}"
 ```
 
 ## Practical Example: Calculator Service
@@ -143,7 +144,7 @@ ros2 service call /add_two_ints std_srvs/srv/AddTwoInts "{a: 5, b: 3}"
 ```python
 import rclpy
 from rclpy.node import Node
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
 
 class CalculatorService(Node):
     def __init__(self):
@@ -165,7 +166,7 @@ class CalculatorService(Node):
 def main(args=None):
     rclpy.init(args=args)
     calculator = CalculatorService()
-    self.get_logger().info('Calculator service ready')
+    calculator.get_logger().info('Calculator service ready')
     rclpy.spin(calculator)
     rclpy.shutdown()
 
@@ -178,7 +179,7 @@ if __name__ == '__main__':
 ```python
 import rclpy
 from rclpy.node import Node
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
 
 class CalculatorClient(Node):
     def __init__(self):

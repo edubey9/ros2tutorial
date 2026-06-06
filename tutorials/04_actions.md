@@ -20,245 +20,207 @@ An action has three components:
 2. **Feedback**: Periodic updates from server while working
 3. **Result**: Final outcome sent when complete
 
-## Creating an Action Interface
+## Action Interfaces
 
-First, let's use a built-in action. We'll use `Fibonacci` action from `action_tutorials_interfaces`.
+Unlike topics and services, an action's goal/feedback/result structure is defined in a `.action` interface file that must be compiled into a package — you **cannot** use plain Python classes for this.
 
-For this tutorial, we'll simulate using a simple custom goal/result/feedback structure in code.
+For this tutorial we use the `Fibonacci` action from `action_tutorials_interfaces`, which ships with the ROS 2 Humble desktop installation (including the `osrf/ros:humble-desktop` Docker image):
+
+```
+# Fibonacci.action
+# Goal
+int32 order
+---
+# Result
+int32[] sequence
+---
+# Feedback
+int32[] partial_sequence
+```
+
+```python
+from action_tutorials_interfaces.action import Fibonacci
+```
+
+(Creating your own `.action` interface requires a custom interface package — see the official docs: https://docs.ros.org/en/humble/Tutorials/Beginner-Client-Libraries/Custom-ROS2-Interfaces.html)
 
 ## Action Server
 
 An Action Server receives goals and works on them, sending feedback periodically and a result when done.
 
-### Simple Action Server Example
-
 ```python
+import time
 import rclpy
-from rclpy.action import ActionServer
 from rclpy.node import Node
-from rclpy.executors import MultiThreadedExecutor
-from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.action import ActionServer, CancelResponse
+from action_tutorials_interfaces.action import Fibonacci
 
-# For this example, we'll create a simple action interface structure
-class CountdownGoal:
-    count = 0
 
-class CountdownFeedback:
-    current = 0
-
-class CountdownResult:
-    final = 0
-
-class MinimalActionServer(Node):
+class FibonacciActionServer(Node):
     def __init__(self):
-        super().__init__('minimal_action_server')
-        self.get_logger().info('Action server created')
+        super().__init__('fibonacci_action_server')
+        self._action_server = ActionServer(
+            self,
+            Fibonacci,            # action type
+            'fibonacci',          # action name
+            execute_callback=self.execute_callback,
+            cancel_callback=self.cancel_callback,
+        )
 
-    def goal_callback(self, goal_handle):
-        """Called when a new goal is received"""
-        self.get_logger().info('Received goal request')
-        goal = goal_handle.request
-        
-        # Accept the goal
+    def cancel_callback(self, goal_handle):
+        """Called when the client requests cancellation"""
+        return CancelResponse.ACCEPT
+
+    def execute_callback(self, goal_handle):
+        """Do the work: publish feedback as we go, then return the result"""
+        self.get_logger().info(f'Executing goal: Fibonacci({goal_handle.request.order})')
+
+        feedback_msg = Fibonacci.Feedback()
+        feedback_msg.partial_sequence = [0, 1]
+
+        for i in range(1, goal_handle.request.order):
+            # Stop early if the client cancelled the goal
+            if goal_handle.is_cancel_requested:
+                goal_handle.canceled()
+                self.get_logger().info('Goal canceled')
+                return Fibonacci.Result()
+
+            feedback_msg.partial_sequence.append(
+                feedback_msg.partial_sequence[i] + feedback_msg.partial_sequence[i - 1]
+            )
+            goal_handle.publish_feedback(feedback_msg)   # send progress to client
+            time.sleep(0.5)                              # simulate long-running work
+
+        # Only mark the goal succeeded AFTER the work is done
         goal_handle.succeed()
-        
-        # Process the goal
-        for i in range(goal.count + 1):
-            # Send feedback
-            feedback = CountdownFeedback()
-            feedback.current = i
-            goal_handle.publish_feedback(feedback)
-            self.get_logger().info(f'Publishing feedback: {i}')
-            
-            # Simulate work
-            rclpy.spin_once(self, timeout_sec=0.1)
-        
-        # Send final result
-        result = CountdownResult()
-        result.final = goal.count
+
+        result = Fibonacci.Result()
+        result.sequence = feedback_msg.partial_sequence
         return result
+
 
 def main(args=None):
     rclpy.init(args=args)
-    server = MinimalActionServer()
+    server = FibonacciActionServer()
     rclpy.spin(server)
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
 ```
 
+Key points:
+- `ActionServer(...)` registers the server on the ROS graph — without it, nothing is reachable by clients.
+- `goal_handle.publish_feedback(...)` streams progress to the client during execution.
+- `goal_handle.succeed()` is called **after** the work completes (not to "accept" the goal — acceptance is automatic unless you provide a `goal_callback`).
+
 ## Action Client
 
-An Action Client sends goals and receives feedback and results.
+An Action Client sends goals and receives feedback and results. The flow is asynchronous and callback-driven:
 
-### Simple Action Client Example
+1. `send_goal_async()` → future resolves with a **goal handle** (accepted/rejected)
+2. `goal_handle.get_result_async()` → future resolves with the **result**
+3. `feedback_callback` fires every time the server publishes feedback
 
 ```python
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionClient
-import time
+from action_tutorials_interfaces.action import Fibonacci
 
-class MinimalActionClient(Node):
+
+class FibonacciActionClient(Node):
     def __init__(self):
-        super().__init__('minimal_action_client')
-        self.action_client = self.create_action_client(
-            Fibonacci,
-            'fibonacci'
-        )
-        
-        while not self.action_client.server_is_ready():
-            self.get_logger().info('Waiting for action server...')
-            time.sleep(1)
+        super().__init__('fibonacci_action_client')
+        self._action_client = ActionClient(self, Fibonacci, 'fibonacci')
 
     def send_goal(self, order):
+        # Block until the server is available
+        self._action_client.wait_for_server()
+
         goal_msg = Fibonacci.Goal()
         goal_msg.order = order
-        
-        self._send_goal_future = self.action_client.send_goal_async(
+
+        send_goal_future = self._action_client.send_goal_async(
             goal_msg,
-            feedback_callback=self.feedback_callback
+            feedback_callback=self.feedback_callback,
         )
-        
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
+        send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):
         goal_handle = future.result()
         if not goal_handle.accepted:
             self.get_logger().info('Goal rejected')
+            rclpy.shutdown()
             return
-        
+
         self.get_logger().info('Goal accepted')
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
+        get_result_future = goal_handle.get_result_async()
+        get_result_future.add_done_callback(self.get_result_callback)
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        self.get_logger().info(f'Received feedback: {feedback.sequence}')
+        self.get_logger().info(f'Received feedback: {list(feedback.partial_sequence)}')
 
     def get_result_callback(self, future):
         result = future.result().result
-        self.get_logger().info(f'Result: {result.sequence}')
+        self.get_logger().info(f'Result: {list(result.sequence)}')
+        rclpy.shutdown()   # we're done — stop spinning
+
 
 def main(args=None):
     rclpy.init(args=args)
-    action_client = MinimalActionClient()
+    action_client = FibonacciActionClient()
     action_client.send_goal(10)
-    
-    # Keep running to receive callbacks
+
+    # Keep running to receive callbacks (until get_result_callback shuts down)
     rclpy.spin(action_client)
-    rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
 ```
 
-## Practical Example: Countdown Action
+## Try It: Run the Example
 
-### Action Server (Countdown)
+The working version of this code is in `examples/action_example.py`:
+
+```bash
+# Terminal 1
+python3 examples/action_example.py server
+
+# Terminal 2
+python3 examples/action_example.py client
+```
+
+You should see feedback arriving in the **client** terminal while the **server** computes — that's the key behavior that distinguishes actions from services.
+
+## Adapting It: Countdown
+
+Exercise 3 asks you to build a countdown action. You can reuse the same `Fibonacci` interface — treat `goal.order` as the number to count down from, and publish the countdown-so-far as `partial_sequence`. The server skeleton:
 
 ```python
-import rclpy
-from rclpy.node import Node
-from rclpy.action import ActionServer, CancelResponse
-import time
+def execute_callback(self, goal_handle):
+    feedback_msg = Fibonacci.Feedback()
 
-class CountdownActionServer(Node):
-    def __init__(self):
-        super().__init__('countdown_action_server')
-        self._action_server = ActionServer(
-            self,
-            Countdown,
-            'countdown',
-            execute_callback=self.execute_callback,
-            cancel_callback=self.cancel_callback
-        )
+    for i in range(goal_handle.request.order, -1, -1):
+        if goal_handle.is_cancel_requested:
+            goal_handle.canceled()
+            return Fibonacci.Result()
 
-    def execute_callback(self, goal_handle):
-        """Execute the countdown action"""
-        self.get_logger().info(f'Executing countdown from {goal_handle.request.target}')
-        
-        feedback = Countdown.Feedback()
-        
-        for i in range(goal_handle.request.target, -1, -1):
-            if goal_handle.is_cancel_requested:
-                goal_handle.canceled()
-                self.get_logger().info('Goal cancelled')
-                return Countdown.Result()
-            
-            feedback.current = i
-            goal_handle.publish_feedback(feedback)
-            self.get_logger().info(f'Countdown: {i}')
-            time.sleep(1)
-        
-        goal_handle.succeed()
-        result = Countdown.Result()
-        result.complete = True
-        return result
+        feedback_msg.partial_sequence.append(i)
+        goal_handle.publish_feedback(feedback_msg)
+        self.get_logger().info(f'Countdown: {i}')
+        time.sleep(1)
 
-    def cancel_callback(self, goal_handle):
-        """Called when cancel is requested"""
-        return CancelResponse.ACCEPT
-
-def main(args=None):
-    rclpy.init(args=args)
-    server = CountdownActionServer()
-    rclpy.spin(server)
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
+    goal_handle.succeed()
+    result = Fibonacci.Result()
+    result.sequence = feedback_msg.partial_sequence
+    return result
 ```
 
-### Action Client (Countdown)
-
-```python
-import rclpy
-from rclpy.node import Node
-from rclpy.action import ActionClient
-
-class CountdownActionClient(Node):
-    def __init__(self):
-        super().__init__('countdown_action_client')
-        self._action_client = ActionClient(self, Countdown, 'countdown')
-
-    def send_goal(self, target):
-        """Send countdown goal"""
-        while not self._action_client.server_is_ready():
-            self.get_logger().info('Waiting for countdown action server...')
-            time.sleep(1)
-
-        goal_msg = Countdown.Goal()
-        goal_msg.target = target
-
-        self._send_goal_future = self._action_client.send_goal_async(
-            goal_msg,
-            feedback_callback=self.feedback_callback
-        )
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
-
-    def feedback_callback(self, feedback_msg):
-        self.get_logger().info(f'Current: {feedback_msg.feedback.current}')
-
-    def goal_response_callback(self, future):
-        goal_handle = future.result()
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.get_result_callback)
-
-    def get_result_callback(self, future):
-        self.get_logger().info('Countdown complete!')
-
-def main(args=None):
-    rclpy.init(args=args)
-    client = CountdownActionClient()
-    client.send_goal(5)
-    rclpy.spin(client)
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
-```
+The client is identical to the Fibonacci client — only the action name changes.
 
 ## Action vs Service vs Publisher/Subscriber
 
@@ -277,13 +239,13 @@ if __name__ == '__main__':
 ros2 action list
 
 # Get info about an action
-ros2 action info /action_name
+ros2 action info /fibonacci
 
 # Send a goal via CLI
-ros2 action send_goal /countdown Countdown "{target: 5}"
+ros2 action send_goal /fibonacci action_tutorials_interfaces/action/Fibonacci "{order: 5}"
 
 # Send a goal and see feedback
-ros2 action send_goal /countdown Countdown "{target: 5}" --feedback
+ros2 action send_goal /fibonacci action_tutorials_interfaces/action/Fibonacci "{order: 5}" --feedback
 ```
 
 ## Key Takeaways
@@ -292,7 +254,8 @@ ros2 action send_goal /countdown Countdown "{target: 5}" --feedback
 2. **Actions can be cancelled** by the client
 3. **Feedback is published** periodically during execution
 4. **Result is sent** when the action completes
-5. **Actions are more complex** but provide better UX for long tasks
+5. **Action interfaces are compiled `.action` files**, not plain Python classes
+6. **`goal_handle.succeed()` comes after the work**, not before
 
 ## Comparison Summary
 

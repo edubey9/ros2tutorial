@@ -21,6 +21,7 @@ Hints:
 - Use create_publisher(Int32, 'counter', 10)
 - Use create_subscription(Int32, 'counter', callback, 10)
 - Use self.create_timer() for periodic publishing
+- To stop after publishing 10, call self.timer.cancel() in the timer callback
 """
 
 import rclpy

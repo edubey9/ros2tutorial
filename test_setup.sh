@@ -73,11 +73,19 @@ check_packages() {
     
     python3 -c "import rclpy" 2>/dev/null && \
         print_success "rclpy installed" || \
-        print_error "rclpy not installed - run: pip install -r requirements.txt"
-    
+        print_error "rclpy not found - source ROS 2: source /opt/ros/humble/setup.bash"
+
     python3 -c "from std_msgs.msg import String" 2>/dev/null && \
         print_success "std_msgs installed" || \
-        print_error "std_msgs not installed - run: pip install -r requirements.txt"
+        print_error "std_msgs not found - source ROS 2: source /opt/ros/humble/setup.bash"
+
+    python3 -c "from example_interfaces.srv import AddTwoInts" 2>/dev/null && \
+        print_success "example_interfaces installed (needed for services tutorial)" || \
+        print_error "example_interfaces not found - source ROS 2: source /opt/ros/humble/setup.bash"
+
+    python3 -c "from action_tutorials_interfaces.action import Fibonacci" 2>/dev/null && \
+        print_success "action_tutorials_interfaces installed (needed for actions tutorial)" || \
+        print_error "action_tutorials_interfaces not found - included in ros-humble-desktop"
 }
 
 # Check files
