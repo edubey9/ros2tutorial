@@ -16,7 +16,7 @@ git clone <repository-url> ros2-learning
 cd ros2-learning
 
 # Or if you already have the folder, just ensure it's a git repo:
-cd /path/to/Project1
+cd /path/to/ros2tutorial
 git status
 ```
 
@@ -49,7 +49,18 @@ echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### Option C: Windows 10/11 (Docker or WSL2)
+#### Option C: Windows 10/11 (Docker - Recommended)
+
+```powershell
+# Install Docker Desktop: https://www.docker.com/products/docker-desktop
+# (requires the WSL2 backend, which the installer sets up)
+
+# Then follow the Docker Setup section below — all examples and
+# exercises run inside the osrf/ros:humble-desktop container.
+```
+
+> Alternative: install Ubuntu 22.04 in WSL2 and follow the Linux
+> instructions (Option B) inside WSL. Docker is simpler to start with.
 
 ---
 
@@ -283,7 +294,7 @@ Create `.vscode/tasks.json` in your project:
       }
     },
     {
-      "label": "ROS2: Run Exercise 1",
+      "label": "ROS2: Run Exercise 1 Publisher",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -292,7 +303,7 @@ Create `.vscode/tasks.json` in your project:
         "ros2-humble",
         "bash",
         "-c",
-        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_01_pub_sub.py"
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_01_pub_sub.py pub"
       ]
     },
     {
@@ -436,9 +447,11 @@ open -a Docker
 # Navigate to project directory
 cd /path/to/ros2-learning
 
-# Create virtual environment (optional but recommended)
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Create virtual environment (optional)
+# IMPORTANT: --system-site-packages is required, or the venv will
+# hide the ROS 2 packages (rclpy etc.) and imports will fail!
+python3 -m venv venv --system-site-packages
+source venv/bin/activate
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -463,7 +476,7 @@ pkill -f "pub_sub_example"
 
 ## Prerequisites
 
-- **ROS 2 Humble** installed on your system (see [Installation Guide](#installation-guide))
+- **ROS 2 Humble** installed on your system (see [Quick Setup](#quick-setup-on-a-new-computer))
 - **Python 3.10+**
 - **pip** package manager
 - **Git** (for cloning and version control)
@@ -488,8 +501,9 @@ pkill -f ros2
 # Remove old virtual environment
 rm -rf venv
 
-# Create fresh virtual environment
-python3 -m venv venv
+# Create fresh virtual environment (--system-site-packages keeps
+# the ROS 2 packages visible inside the venv)
+python3 -m venv venv --system-site-packages
 source venv/bin/activate
 
 # Reinstall dependencies
@@ -519,7 +533,8 @@ pkill -f ros2
 python3 -c "
 import rclpy
 from std_msgs.msg import String
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
+from action_tutorials_interfaces.action import Fibonacci
 print('✓ All imports successful')
 print('✓ ROS 2 is properly configured')
 "
@@ -551,7 +566,7 @@ print('✓ ROS 2 is properly configured')
 
 1. **Clone/navigate to the project**:
    ```bash
-   cd /Users/etash/Documents/Project1
+   cd /path/to/ros2tutorial   # inside Docker: /home/ros2_ws/project
    ```
 
 2. **Install Python dependencies** (if using native ROS 2):
@@ -619,54 +634,24 @@ Follow this structured learning path:
 
 ## Test Scripts and Verification
 
-### Automated Test Script
+### Automated Test Scripts
 
-Create `test_setup.sh` to verify your installation:
+Two test scripts are included in the repository:
 
 ```bash
-#!/bin/bash
-set -e
+# Python version (recommended)
+python3 test_ros2_setup.py
+python3 test_ros2_setup.py --verify    # Quick check only
 
-echo "🧪 Testing ROS 2 Learning Environment Setup"
-echo "============================================"
-
-# Test 1: Python packages
-echo -n "✓ Checking Python packages... "
-python3 -c "
-import rclpy
-from std_msgs.msg import String, Int32
-from std_srvs.srv import AddTwoInts
-" && echo "OK" || echo "FAILED"
-
-# Test 2: ROS 2 CLI
-echo -n "✓ Checking ROS 2... "
-ros2 --version > /dev/null && echo "OK" || echo "FAILED"
-
-# Test 3: Run quick pub/sub test
-echo "✓ Running quick pub/sub test..."
-timeout 5 python3 examples/pub_sub_example.py publisher > /tmp/pub.log 2>&1 &
-PUB_PID=$!
-sleep 2
-timeout 5 python3 examples/pub_sub_example.py subscriber > /tmp/sub.log 2>&1 &
-SUB_PID=$!
-wait $SUB_PID 2>/dev/null || true
-kill $PUB_PID 2>/dev/null || true
-
-if grep -q "I heard" /tmp/sub.log; then
-    echo "  ✓ Pub/Sub communication working"
-else
-    echo "  ✗ Pub/Sub communication failed"
-fi
-
-echo ""
-echo "🎉 Setup verification complete!"
+# Bash version
+bash test_setup.sh
 ```
 
-Run it with:
-```bash
-chmod +x test_setup.sh
-./test_setup.sh
-```
+The test scripts check:
+- ✓ Python packages installed correctly
+- ✓ ROS 2 properly installed and accessible
+- ✓ All tutorial, example, and exercise files present
+- ✓ Basic pub/sub communication works
 
 ### Manual Testing Checklist
 
@@ -694,8 +679,8 @@ ros2 topic echo /counter          # Should show messages
 ```bash
 # Test commands
 ros2 service list                 # Should show /multiply_numbers
-ros2 service type /multiply_numbers  # Should show AddTwoInts
-ros2 service call /multiply_numbers std_srvs/srv/AddTwoInts "{a: 5, b: 6}"  # Should return 30 (if multiplying)
+ros2 service type /multiply_numbers  # Should show example_interfaces/srv/AddTwoInts
+ros2 service call /multiply_numbers example_interfaces/srv/AddTwoInts "{a: 5, b: 6}"  # Should return 30 (if multiplying)
 ```
 
 #### Exercise 3: Countdown Action
@@ -707,6 +692,7 @@ ros2 service call /multiply_numbers std_srvs/srv/AddTwoInts "{a: 5, b: 6}"  # Sh
 ```bash
 # Monitor with
 ros2 node list                    # Should show both nodes
+ros2 action list                  # Should show /countdown
 # Check logs for feedback messages
 ```
 
@@ -857,15 +843,15 @@ Client: Result: 3 * 4 = 12
 **What to implement:**
 ```python
 # Create CountdownServer class
-# - Implement execute_countdown method
-# - Count down from target to 0
-# - Log each number as "feedback"
-# - Complete with final count
+# - Create an ActionServer named 'countdown' (reusing the Fibonacci interface)
+# - In execute_callback: count down from goal.order to 0
+# - Publish each step as feedback with goal_handle.publish_feedback()
+# - Mark the goal succeeded and return the full sequence as the result
 
 # Create CountdownClient class
-# - Implement send_countdown_request method
-# - Call server's execute_countdown
-# - Receive and display feedback
+# - Create an ActionClient named 'countdown'
+# - Send a goal with send_goal_async(), registering a feedback callback
+# - Display feedback as it arrives, then print the final result
 ```
 
 **Test it:**
@@ -879,16 +865,15 @@ python exercises/exercise_03_actions.py client
 
 **Expected output:**
 ```
-Counting down from 5
-Feedback: 5, 4, 3, 2, 1, 0
-Countdown complete!
+Server: Countdown: 5, 4, 3, 2, 1, 0 ... Goal succeeded
+Client: Feedback: [5], [5, 4], ... Result: [5, 4, 3, 2, 1, 0]
 ```
 
 ### Common Exercise Mistakes
 
 | Mistake | Solution |
 |---------|----------|
-| "ImportError: No module named rclpy" | Run `pip install -r requirements.txt` |
+| "ImportError: No module named rclpy" | Source ROS 2: `source /opt/ros/humble/setup.bash` (run inside the container on macOS/Windows) |
 | "Service not available" | Make sure server runs BEFORE client |
 | Node doesn't connect | Check topic/service names match exactly |
 | Messages not printing | Verify callback function is named correctly |
@@ -938,11 +923,12 @@ source ~/.bashrc
 
 **Problem: "Cannot find Python module rclpy"**
 ```bash
-# Solution: Install Python packages
-pip install -r requirements.txt
+# rclpy is NOT pip-installable — it ships with ROS 2 itself.
+# Solution: source ROS 2 in this terminal
+source /opt/ros/humble/setup.bash
 
-# Or manually:
-pip install rclpy std-msgs
+# On macOS/Windows, make sure you're running the command INSIDE
+# the Docker container (docker exec -it ros2-humble bash)
 ```
 
 **Problem: "ModuleNotFoundError" when running exercises**
@@ -1028,7 +1014,7 @@ ros2 topic echo /counter  # Should show std_msgs/msg/Int32 data
 **Exercise 2 Not Working**
 ```bash
 # Test the service manually
-ros2 service call /multiply_numbers std_srvs/srv/AddTwoInts "{a: 5, b: 6}"
+ros2 service call /multiply_numbers example_interfaces/srv/AddTwoInts "{a: 5, b: 6}"
 
 # Should return sum (or in your case, product)
 # If not, server implementation is wrong
@@ -1154,37 +1140,7 @@ git remote add origin https://github.com/username/ros2-learning.git
 git push -u origin main
 ```
 
-## Test Scripts and Verification
-
-Two test scripts are provided to help you verify your installation and track progress:
-
-### Automated Testing
-
-**Python Version** (Recommended):
-```bash
-python3 test_ros2_setup.py
-# or
-python3 test_ros2_setup.py --verify    # Quick check only
-```
-
-**Bash Version**:
-```bash
-chmod +x test_setup.sh
-bash test_setup.sh
-```
-
-### What the Tests Verify
-
-The test scripts check:
-- ✓ Python packages installed correctly
-- ✓ ROS 2 properly installed and accessible
-- ✓ All tutorial files present
-- ✓ All example files present
-- ✓ All exercise files present
-- ✓ Basic pub/sub communication works
-- ✓ Exercise completion status
-
-### Using Progress Tracker
+## Using the Progress Tracker
 
 The **PROGRESS_TRACKER.md** file helps you track your learning:
 

@@ -71,11 +71,16 @@ docker exec -it ros2-humble bash
 sudo apt update
 sudo apt upgrade -y
 
-# 2. Add ROS 2 repository
-sudo apt install -y curl gnupg2 lsb-release ubuntu-keyring
-curl -sSL https://repo.ros2.org/ros.key | sudo apt-key add -
+# 2. Add the ROS 2 apt repository (official Humble instructions)
+sudo apt install -y software-properties-common curl
+sudo add-apt-repository universe
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+    -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | \
+    sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
 
 # 3. Install ROS 2 Humble
+sudo apt update
 sudo apt install -y ros-humble-desktop
 
 # 4. Add to shell startup
@@ -105,14 +110,13 @@ ros2 --version
 # Navigate to project directory (if not already there)
 cd ~/Projects/ros2-learning
 
-# Create virtual environment (optional but recommended)
-python3 -m venv venv
+# Create virtual environment (optional)
+# IMPORTANT: --system-site-packages is required, otherwise the venv
+# hides the ROS 2 packages (rclpy etc.) installed by apt!
+python3 -m venv venv --system-site-packages
 
-# Activate virtual environment
-# On macOS/Linux:
+# Activate virtual environment (Linux, macOS, and WSL)
 source venv/bin/activate
-# On Windows (WSL):
-source venv/Scripts/activate
 
 # Install Python dependencies
 pip install --upgrade pip
@@ -189,14 +193,20 @@ source ~/.zshrc
 
 ### Problem: "ModuleNotFoundError: No module named 'rclpy'"
 
-**Solution:**
+**Solution:** `rclpy` is NOT pip-installable — it ships with ROS 2 itself.
 ```bash
-# Reinstall Python packages
-pip install --upgrade pip
-pip install -r requirements.txt
+# 1. Source ROS 2 in this terminal
+source /opt/ros/humble/setup.bash
 
-# Verify installation
-python3 -c "import rclpy; print('✓ rclpy installed')"
+# 2. If you're inside a virtual environment, it must be created with
+#    --system-site-packages, otherwise it hides the ROS 2 packages:
+deactivate
+rm -rf venv
+python3 -m venv venv --system-site-packages
+source venv/bin/activate
+
+# Verify
+python3 -c "import rclpy; print('✓ rclpy available')"
 ```
 
 ### Problem: "Permission denied" when running scripts

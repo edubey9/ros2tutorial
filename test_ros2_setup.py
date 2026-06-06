@@ -55,6 +55,8 @@ def check_python_packages():
     packages = {
         'rclpy': 'ROS 2 Python client library',
         'std_msgs': 'Standard ROS 2 message types',
+        'example_interfaces': 'Example interfaces (AddTwoInts service - Tutorial 3)',
+        'action_tutorials_interfaces': 'Action interfaces (Fibonacci action - Tutorial 4)',
     }
     
     all_ok = True

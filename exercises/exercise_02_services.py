@@ -23,13 +23,14 @@ Hints:
 - Use create_client(AddTwoInts, 'multiply_numbers')
 - Wait for service with wait_for_service()
 - Use call_async() to call the service
+- Use rclpy.spin_until_future_complete(self, future) to wait for the response
 """
 
 import sys
 import time
 import rclpy
 from rclpy.node import Node
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
 
 
 # TODO: Implement MultiplyServer class

@@ -10,7 +10,7 @@ Run with: python service_example.py server
 import sys
 import rclpy
 from rclpy.node import Node
-from std_srvs.srv import AddTwoInts
+from example_interfaces.srv import AddTwoInts
 import time
 
 
@@ -49,9 +49,12 @@ class AddTwoIntsClient(Node):
         request = AddTwoInts.Request()
         request.a = a
         request.b = b
-        
+
         self.get_logger().info(f'Sending request: {a} + {b}')
-        self.future = self.cli.call_async(request)
+        future = self.cli.call_async(request)
+        # Block until the response arrives (robust, no fixed timeout)
+        rclpy.spin_until_future_complete(self, future)
+        return future.result()
 
 
 def main():
@@ -77,15 +80,14 @@ def main():
         
         # Make multiple requests
         requests = [(2, 3), (5, 7), (10, 20), (100, 50)]
-        
+
         for a, b in requests:
-            node.send_request(a, b)
-            # Spin to process the response
-            rclpy.spin_once(node, timeout_sec=1)
-            if node.future.done():
-                result = node.future.result()
+            result = node.send_request(a, b)
+            if result is not None:
                 print(f"Result: {a} + {b} = {result.sum}")
-                time.sleep(0.5)
+            else:
+                print(f"Service call failed for {a} + {b}")
+            time.sleep(0.5)
     else:
         print("Invalid option. Use 'server' or 'client'")
         return

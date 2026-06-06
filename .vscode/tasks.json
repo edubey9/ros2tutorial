@@ -122,7 +122,24 @@
       "problemMatcher": []
     },
     {
-      "label": "ROS2: Exercise 1 (Pub/Sub)",
+      "label": "ROS2: Exercise 1 Publisher",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_01_pub_sub.py pub"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Exercise 1 Subscriber",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -139,7 +156,7 @@
       "problemMatcher": []
     },
     {
-      "label": "ROS2: Exercise 2 (Services)",
+      "label": "ROS2: Exercise 2 Server",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -148,7 +165,7 @@
         "ros2-humble",
         "bash",
         "-c",
-        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_02_services.py"
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_02_services.py server"
       ],
       "presentation": {
         "reveal": "always"
@@ -156,7 +173,7 @@
       "problemMatcher": []
     },
     {
-      "label": "ROS2: Exercise 3 (Actions)",
+      "label": "ROS2: Exercise 2 Client",
       "type": "shell",
       "command": "docker",
       "args": [
@@ -165,7 +182,41 @@
         "ros2-humble",
         "bash",
         "-c",
-        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_03_actions.py"
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_02_services.py client"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Exercise 3 Server",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_03_actions.py server"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Exercise 3 Client",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_03_actions.py client"
       ],
       "presentation": {
         "reveal": "always"
