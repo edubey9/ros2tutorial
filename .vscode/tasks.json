@@ -1,0 +1,231 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "ROS2: Run Test Script",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 test_ros2_setup.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "echo": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Run Publisher (Example 1)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/pub_sub_example.py publisher"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Run Subscriber (Example 1)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/pub_sub_example.py subscriber"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Run Service Server (Example 2)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/service_example.py server"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Run Service Client (Example 2)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/service_example.py client"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Run Action Server (Example 3)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/action_example.py server"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Run Action Client (Example 3)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 examples/action_example.py client"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Exercise 1 (Pub/Sub)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_01_pub_sub.py"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Exercise 2 (Services)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_02_services.py"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Exercise 3 (Actions)",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash",
+        "-c",
+        "source /opt/ros/humble/setup.bash && cd /home/ros2_ws/project && python3 exercises/exercise_03_actions.py"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Interactive Container Shell",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-it",
+        "ros2-humble",
+        "bash"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "echo": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Start Docker Container",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "start",
+        "ros2-humble"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Stop Docker Container",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "stop",
+        "ros2-humble"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ROS2: Check Container Status",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "ps",
+        "-a"
+      ],
+      "presentation": {
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

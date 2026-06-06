@@ -1,0 +1,10 @@
+# ROS 2 Python packages
+# NOTE: These packages are only available when ROS 2 Humble is installed
+# rclpy==0.19.0  # Uncomment after installing ROS 2
+# std-msgs      # Uncomment after installing ROS 2
+# sensor-msgs   # Uncomment after installing ROS 2
+# geometry-msgs # Uncomment after installing ROS 2
+
+# Development packages
+pytest>=7.0.0  # For testing
+pyyaml>=5.4.0  # For configuration
