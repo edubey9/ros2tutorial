@@ -1,9 +1,8 @@
-# ROS 2 Python packages
-# NOTE: These packages are only available when ROS 2 Humble is installed
-# rclpy==0.19.0  # Uncomment after installing ROS 2
-# std-msgs      # Uncomment after installing ROS 2
-# sensor-msgs   # Uncomment after installing ROS 2
-# geometry-msgs # Uncomment after installing ROS 2
+# ROS 2 Python packages (rclpy, std_msgs, sensor_msgs, geometry_msgs, etc.)
+# NOTE: These are NOT installed via pip. They ship with ROS 2 Humble and
+# become importable after you install `ros-humble-desktop` and run:
+#     source /opt/ros/humble/setup.bash
+# (For reference, Humble ships rclpy 3.3.x.)
 
 # Development packages
 pytest>=7.0.0  # For testing
